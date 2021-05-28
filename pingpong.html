@@ -1,0 +1,358 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script
+  src="https://code.jquery.com/jquery-3.6.0.js"
+  integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk="
+  crossorigin="anonymous"></script>
+    <title>Document</title>
+</head>
+<body>
+    <style>
+        html {
+  min-width: 350px;
+}
+
+h1 {
+  text-align: center;
+}
+
+#box {
+  width: 80%;
+  min-width: 350px;
+  margin: 0 auto;
+}
+
+#pongCanvas {
+  border: 1px solid black;
+  background: black;
+  margin: 0 auto;
+  display: block;
+  width: 500px;
+}
+
+#pp {
+  margin: 0 2em;
+}
+
+#p1,
+#p2 {
+  margin: 0 2em;
+  display: inline-block;
+}
+    </style>
+    <div id="box">
+        <canvas id="pongCanvas" width="480" height="350">
+            
+        </canvas>
+        <center>
+        <h2 id="time"></h2>
+        </center>
+        <div id="info">
+            
+          
+          
+          
+        </div>
+      </div>
+      <script>
+          var canvas = document.getElementById('pongCanvas');
+var ctx = canvas.getContext('2d');
+
+var color = '#ffffff';
+
+var player1Score = 0;
+var player2Score = 0;
+
+//* scenery
+var wallsX = canvas.width;
+var wallsY = 2;
+var divideX = 2;
+var divideY = canvas.height;
+
+//* defines the ball
+var ball = 8;
+var ballX = (canvas.width - ball) / 2;
+var ballY = (canvas.height - ball) / 2;
+var ballStart = [-2.5, 2.5]
+var xBallSpeed = ballStart[Math.floor(Math.random()*ballStart.length)];
+var yBallSpeed = ballStart[Math.floor(Math.random()*ballStart.length)];
+
+//* defines the paddles
+var paddleHeight = 50;
+var paddleWidth = 7;
+var player1X = 0;
+var player1Y = (canvas.height - paddleHeight) / 2;
+var player2X = (canvas.width - paddleWidth);
+var player2Y = (canvas.height - paddleHeight) / 2;
+var second = 0, minute = 0, hour = 0;
+
+/*
+*** controls
+ */
+
+var wPressed = false;
+var sPressed = false;
+var upPressed = false;
+var downPressed = false;
+var gameToggle = true; //8 backspace
+
+  function timer()
+  {
+    if(second < 59) second = second + 1;
+    else
+    {
+      second = 0; 
+      if(minute < 59) minute = minute + 1;
+      else{minute = 0; hour = hour + 1;}
+    }
+    $("#time").html(hour + " : " + minute + " : " + second);
+  }
+  $(document).ready(function(){
+    $("#time").html("0 : 0 : 0");
+    setInterval(timer, 1000);
+  });
+
+document.addEventListener('keydown', keyDownHandler, false);
+document.addEventListener('keyup', keyUpHandler, false);
+
+function keyDownHandler(e) {
+  if (e.keyCode === 87) {
+    wPressed = true;
+  }
+  else if (e.keyCode === 83) {
+    sPressed = true;
+  }
+  else if (e.keyCode === 38) {
+    upPressed = true;
+  }
+  else if (e.keyCode === 40) {
+    downPressed = true;
+  }
+  else if (e.keyCode === 8) {
+    if (gameToggle === true) {
+      gameToggle = false;
+    }
+    else {
+      gameToggle = true;
+      requestAnimationFrame(draw);
+    }
+  }
+}
+
+function keyUpHandler(e) {
+  if (e.keyCode === 87) {
+    wPressed = false;
+  }
+  else if (e.keyCode === 83) {
+    sPressed = false;
+  }
+  else if (e.keyCode === 38) {
+    upPressed = false;
+  }
+  else if (e.keyCode === 40) {
+    downPressed = false;
+  }
+}
+
+/*
+*** end controls
+ */
+
+//* scenery shapes
+
+function drawWallTop() {
+  ctx.beginPath();
+  ctx.rect(0, 0, wallsX, wallsY);
+  ctx.fillStyle = color;
+  ctx.fill();
+  ctx.closePath();
+}
+
+function drawWallBottom() {
+  ctx.beginPath();
+  ctx.rect(0, (canvas.height - wallsY), wallsX, wallsY);
+  ctx.fillStyle = color;
+  ctx.fill();
+  ctx.closePath();
+}
+
+function drawDivide() {
+  ctx.beginPath();
+  ctx.rect((canvas.width / 2) - (divideX / 2), 0, divideX, divideY);
+  ctx.fillStyle = color;
+  ctx.fill();
+  ctx.closePath();
+}
+
+//* player and ball shapes
+
+function drawPlayer1() {
+  ctx.beginPath();
+  ctx.rect(player1X, player1Y, paddleWidth, paddleHeight);
+  ctx.fillStyle = color;
+  ctx.fill();
+  ctx.closePath();
+}
+
+function drawPlayer2() {
+  ctx.beginPath();
+  ctx.rect(player2X, player2Y, paddleWidth, paddleHeight);
+  ctx.fillStyle = color;
+  ctx.fill();
+  ctx.closePath();
+}
+
+function drawBall() {
+  ctx.beginPath();
+  ctx.rect(ballX, ballY, ball, ball);
+  ctx.fillStyle = color;
+  ctx.fill();
+  ctx.closePath();
+}
+
+/**
+**** end shapes
+ **/
+
+//* keeping score
+
+function drawPlayer1Score() {
+  ctx.font = '24px Courier';
+  ctx.fillStyle = color;
+  ctx.fillText(player1Score, canvas.width * 0.25, 25);
+  // second = 0, minute = 0, hour = 0;
+}
+
+function drawPlayer2Score() {
+  ctx.font = '24px Courier';
+  ctx.fillStyle = color;
+  ctx.fillText(player2Score, canvas.width * 0.75, 25);
+  // second = 0, minute = 0, hour = 0;
+}
+
+/**
+**** painting the canvas and enabling collision detection
+ **/
+
+function draw() {
+
+//* resets canvas
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+//* draw scenery
+  drawWallTop();
+  drawWallBottom();
+  drawDivide();
+
+//* draw player and ball shapes
+  drawBall();
+  drawPlayer1();
+  drawPlayer2();
+
+//* draw score
+  drawPlayer1Score();
+  drawPlayer2Score();
+
+/**
+**** IF      // make ball collide with y axis
+**** ELSE IF // player 1 paddle collsion
+**** ELSE IF // player 2 paddle collision
+ **/
+  if (ballY + yBallSpeed > canvas.height - ball || ballY + yBallSpeed < 0) {
+    yBallSpeed = -yBallSpeed;
+  }
+  else if (ballX + xBallSpeed < player1X + paddleWidth) {
+    if (ballY > player1Y && ballY < player1Y + paddleHeight) {
+      xBallSpeed = -xBallSpeed * 1.03; // multiplies speed on paddle collision
+      yBallSpeed = yBallSpeed * 1.03;
+    }
+  }
+  else if ((ballX + ball) + xBallSpeed > player2X) {
+    if ((ballY + ball) > player2Y && (ballY + ball) < player2Y + paddleHeight) {
+      xBallSpeed = -xBallSpeed * 1.03; // multiplies speed on paddle collision
+      yBallSpeed = yBallSpeed * 1.03;
+    }
+  }
+
+/**
+**** scoring conditions and ball reset
+ **/
+//* player 1 score
+  if (ballX + xBallSpeed > canvas.width - ball) {
+    if (player1Score !== 9) {
+      player1Score += 1;
+      ballX = (canvas.width - ball) / 2;
+      ballY = (canvas.height - ball) / 2;
+      second = 0, minute = 0, hour = 0;
+      if (player1Score >= 5 || player2Score >= 5) {
+        xBallSpeed = -3;
+        yBallSpeed = ballStart[Math.floor(Math.random()*ballStart.length)] * 1.5;
+      } else {
+        xBallSpeed = -2;
+        yBallSpeed = ballStart[Math.floor(Math.random()*ballStart.length)];
+      }
+    } else {
+      alert("GAME OVER! Player 1 wins!")
+      document.location.reload();
+    }
+  }
+//* player 2 score
+  else if (ballX + xBallSpeed < 0) {
+    if (player2Score !== 9) {
+      player2Score += 1;
+      ballX = (canvas.width - ball) / 2;
+      ballY = (canvas.height - ball) / 2;
+      second = 0, minute = 0, hour = 0;
+      if (player2Score >= 5 || player1Score >= 5) {
+        xBallSpeed = 3;
+        yBallSpeed = ballStart[Math.floor(Math.random()*ballStart.length)] * 1.5;
+      } else {
+        xBallSpeed = 2;
+        yBallSpeed = ballStart[Math.floor(Math.random()*ballStart.length)];
+      }
+    } else {
+      alert("GAME OVER! Player 2 wins!")
+      document.location.reload();
+    }
+  }
+
+/**
+**** paddle speed and collision with frame
+ **/
+ 
+//* Player 1
+  if (wPressed && player1Y > wallsY) {
+    player1Y -= 5;
+  } else if (sPressed && player1Y < canvas.height - (paddleHeight - wallsY)) {
+    player1Y += 5;
+  }
+//* Player2
+  if (upPressed && player2Y > wallsY) {
+    player2Y -= 5;
+  } else if (downPressed && player2Y < canvas.height - (paddleHeight - wallsY)) {
+    player2Y += 5;
+  }
+
+//* draws ball across the canvas
+  ballX += xBallSpeed;
+  ballY += yBallSpeed;
+
+//* play and pause animation conditions
+  if(gameToggle){
+    
+    requestAnimationFrame(draw);
+  }
+  else if (!gameToggle) {
+    window.cancelAnimationFrame(requestAnimationFrame(draw));
+  }
+}
+
+draw();
+
+
+      </script>
+</body>
+</html>
